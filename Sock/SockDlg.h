@@ -36,8 +36,10 @@ public:
 	int m_iPort;
 	CButton m_ctlConnect;
 	CString m_strMessage;
-	CListBox m_ctlSent;
-	CListBox m_ctlRecvd;
+	CListBox m_ctlSent;     //显示已发送的密文信息
+	CListBox m_ctlMSent;    //显示已发送的明文信息
+	CListBox m_ctlRecvd;    //显示已接收密文解密后信息
+	CListBox m_ctlLCRecvd;  //显示已接收密文信息
 	afx_msg void OnBnClickedRclient();
 	afx_msg void OnBnClickedRserver();
 
@@ -56,4 +58,6 @@ public:
 	afx_msg void OnBnClickedBclose();
 	CString key;
 	afx_msg void OnEnChangeKey();
+
+	BOOL PreTranslateMessage(MSG* pMsg);
 };

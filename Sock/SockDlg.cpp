@@ -70,6 +70,8 @@ void CSockDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LSENT, m_ctlSent);
 	DDX_Control(pDX, IDC_LRECVD, m_ctlRecvd);
 	DDX_Text(pDX, IDC_KEY, key);
+	DDX_Control(pDX, IDC_LCRECVD, m_ctlLCRecvd);
+	DDX_Control(pDX, IDC_LMSEN, m_ctlMSent);
 }
 
 BEGIN_MESSAGE_MAP(CSockDlg, CDialogEx)
@@ -223,6 +225,7 @@ void CSockDlg::OnReceive() {
 		pBuf[iRcvd] = NULL;
 		// 复制消息到串变量
 		strRecvd = pBuf;
+		m_ctlLCRecvd.AddString(strRecvd);
 
 		//char key[8]={1,2,3,4,5,6,7,8};
 		char ckey[8]={key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7]};
@@ -234,8 +237,6 @@ void CSockDlg::OnReceive() {
 		{
 			for(k=0;k<=7;k++,j++)
 			    in[k]=strRecvd.GetAt(j);
-			//for(k=0;k<3;k++)
-				//jmc.Des_one(temp,inbuff1,skey,DECRYPT);	
 			Des(temp,in,1);
 			for(k=0;k<=7;k++,m++)
 				out[m]=temp[k];
@@ -267,7 +268,7 @@ void CSockDlg::OnClose() {
 		// 是，激活连接配置控件
 		GetDlgItem(IDC_BCONNECT)->EnableWindow(TRUE);
 		//GetDlgItem(IDC_ESERVADDR)->EnableWindow(TRUE);
-		GetDlgItem(IDC_KEY)->EnableWindow(FALSE);
+		GetDlgItem(IDC_KEY)->EnableWindow(TRUE);
 		GetDlgItem(IDC_IPADDRESS)->EnableWindow(TRUE);
 		GetDlgItem(IDC_ESERVPORT)->EnableWindow(TRUE);
 		GetDlgItem(IDC_RCLIENT)->EnableWindow(TRUE);
@@ -364,11 +365,8 @@ void CSockDlg::OnBnClickedBsend()
 	DesSetKey(ckey);
 	for(i=m_strMessage.GetLength();i>=8;i=i-8)
 		{
-
 			for(k=0;k<=7;k++,j++)
 			    in[k]=m_strMessage.GetAt(j);
-			//for(k=0;k<3;k++)
-				//jmc.Des_one(temp,in,key,ENCRYPT);	
 			  Des(temp,in,0);
 			for(k=0;k<=7;k++,m++)
 				out[m]=temp[k];
@@ -377,8 +375,6 @@ void CSockDlg::OnBnClickedBsend()
 				in[k]=m_strMessage.GetAt(j);
 			for(;k<=7;k++)
 				in[k]=NULL;  //不足整数8的用1进行填充
-			//for(k=0;k<3;k++)
-				//jmc.Des_one(temp,in,skey,ENCRYPT);
 			 Des(temp,in,0);
 			for(k=0;k<=7;k++,m++)
 				out[m]=temp[k];
@@ -396,7 +392,9 @@ void CSockDlg::OnBnClickedBsend()
  			MessageBox("发送失败！", "套接字错误");
 		else {
 			// 添加消息到列表框
+			m_ctlMSent.AddString(m_strMessage);
 			m_ctlSent.AddString(m_strSend);
+			m_strMessage="";
 			// 使控件与变量同步
 			UpdateData(FALSE);
 		}
@@ -410,7 +408,7 @@ void CSockDlg::OnBnClickedBclose()
 	// TODO: 在此添加控件通知处理程序代码
 	// 调用OnClose函数
 	   OnClose();
-
+	  
 }
 
 
@@ -431,4 +429,12 @@ void CSockDlg::OnEnChangeKey()
 		key.Delete(8,key.GetLength()-8);  //清除多余字节
 		this->UpdateData(false);
 	}
+}
+
+
+BOOL CSockDlg::PreTranslateMessage(MSG* pMsg)
+{
+	if(pMsg->message==WM_KEYDOWN && pMsg->wParam==VK_RETURN)
+              OnBnClickedBsend();
+	return false;
 }
